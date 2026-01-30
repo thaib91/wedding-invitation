@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai & Partner | Wedding Invitation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Italiana&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* White Rabbit Hole inspired - lighter, botanical wonderland */
+            --gold: #B8A574;
+            --gold-light: #E5DCC5;
+            --gold-soft: #D4C9A8;
+            --cream: #FDFCF9;
+            --cream-dark: #F5F3ED;
+            --white: #FFFFFF;
+            --mint: #C5D9C8;
+            --sage: #9BB89A;
+            --sage-light: #C8DCC6;
+            --fern: #7A9B7A;
+            --forest: #4A6B5A;
+            --forest-soft: #6B8B7A;
+            --text-soft: #5C7264;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(160deg, var(--white) 0%, var(--cream) 35%, var(--cream-dark) 65%, var(--cream) 85%, var(--white) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* 3D floating flowers layer */
+        .flowers-3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            perspective: 1200px;
+        }
+
+        .flower-3d {
+            position: absolute;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .flower-3d .petals {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .flower-3d .petal {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform-origin: center bottom;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+        }
+
+        .flower-3d.rose .petal {
+            width: 28px;
+            height: 36px;
+            margin-left: -14px;
+            margin-top: -36px;
+            background: radial-gradient(ellipse 60% 70% at 50% 100%, var(--gold-light), var(--gold-soft));
+            border-radius: 50% 50% 45% 45%;
+            box-shadow: inset 0 -4px 12px rgba(255,255,255,0.4);
+        }
+
+        .flower-3d.daisy .petal {
+            width: 12px;
+            height: 24px;
+            margin-left: -6px;
+            margin-top: -24px;
+            background: linear-gradient(180deg, var(--white) 0%, var(--cream) 100%);
+            border-radius: 50%;
+            border: 1px solid var(--gold-light);
+        }
+
+        .flower-3d.bloom {
+            animation: flowerBreeze 14s ease-in-out infinite;
+        }
+
+        .flower-3d.bloom .petals {
+            animation: flowerPetalsBreeze 18s ease-in-out infinite;
+        }
+
+        .flower-3d.bloom-2 {
+            animation: flowerBreeze 16s ease-in-out infinite 2s;
+        }
+
+        .flower-3d.bloom-2 .petals {
+            animation: flowerPetalsBreeze 20s ease-in-out infinite reverse;
+        }
+
+        .flower-3d.bloom-3 {
+            animation: flowerBreeze 15s ease-in-out infinite 4s;
+        }
+
+        .flower-3d.bloom-3 .petals {
+            animation: flowerPetalsBreeze 22s ease-in-out infinite 1s;
+        }
+
+        /* Gentle breeze: more visible drift and tilt so flowers move clearly */
+        @keyframes flowerBreeze {
+            0%, 100% { transform: translate(0, 0) rotateX(4deg) rotateY(0deg); }
+            25% { transform: translate(14px, -10px) rotateX(10deg) rotateY(14deg); }
+            50% { transform: translate(22px, 4px) rotateX(6deg) rotateY(24deg); }
+            75% { transform: translate(10px, -14px) rotateX(14deg) rotateY(10deg); }
+        }
+
+        @keyframes flowerPetalsBreeze {
+            0%, 100% { transform: rotateY(0deg) rotateZ(0deg); }
+            50% { transform: rotateY(180deg) rotateZ(10deg); }
+            100% { transform: rotateY(360deg) rotateZ(18deg); }
+        }
+
+        .flower-3d .center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            margin: -7px 0 0 -7px;
+            background: radial-gradient(circle at 30% 30%, var(--gold-light), var(--gold));
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .flower-3d.daisy .center {
+            width: 10px;
+            height: 10px;
+            margin: -5px 0 0 -5px;
+            background: radial-gradient(circle at 30% 30%, var(--gold-soft), var(--gold));
+        }
+
+        .invitation-container {
+            position: relative;
+            z-index: 10;
+            perspective: 1000px;
+            perspective-origin: center center;
+            overflow: visible;
+        }
+
+        .card-wrapper {
+            width: min(420px, 92vw);
+            height: min(88vh, 720px);
+            position: relative;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            transition: transform 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .card-wrapper.state-front {
+            transform: rotateY(0deg);
+        }
+
+        .card-wrapper.state-back {
+            transform: rotateY(180deg);
+        }
+
+        .card-wrapper.state-rsvp {
+            transform: rotateY(360deg);
+        }
+
+        /* Hide RSVP when on front or back (stops RSVP flashing when flipping front→back) */
+        .card-wrapper.state-front .card-rsvp,
+        .card-wrapper.state-back .card-rsvp {
+            visibility: hidden;
+        }
+        /* Only hide front when on RSVP so back→RSVP shows back rotating away (same flip as front→back) */
+        .card-wrapper.state-rsvp .card-front {
+            visibility: hidden;
+        }
+
+        /* Visible edge so the card doesn’t disappear at 90° during flip */
+        .card-face {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-sizing: border-box;
+            box-shadow: 
+                0 20px 60px rgba(74, 107, 90, 0.12),
+                0 8px 24px rgba(0, 0, 0, 0.06),
+                inset 0 0 0 1px rgba(184, 165, 116, 0.25);
+        }
+
+        .card-front {
+            background: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .card-front::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid var(--gold);
+            margin: 15px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .card-front::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 0% 0%, var(--gold-light) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, var(--cream-dark) 0%, transparent 40%);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .photo-frame {
+            width: 76%;
+            max-width: 320px;
+            aspect-ratio: 320 / 420;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .photo-frame::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 1px solid var(--gold);
+            opacity: 0.5;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: sepia(10%) contrast(1.05);
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, var(--cream-dark) 0%, var(--cream) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--forest);
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .photo-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.4;
+        }
+
+        .front-names {
+            font-family: 'Italiana', serif;
+            font-size: 28px;
+            color: var(--forest);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .front-names, .couple-names, .date-day, .venue-name, .time-section { color: var(--forest); }
+        .invitation-text, .date-month-year, .venue-address, .flip-hint { color: var(--text-soft); }
+        .event-type, .rsvp-text { color: var(--sage); }
+
+        .front-ampersand {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 24px;
+            color: var(--gold);
+            margin: 0 15px;
+        }
+
+        .flip-hint {
+            position: absolute;
+            bottom: 20px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            opacity: 0.8;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .card-back {
+            background: var(--cream);
+            transform: rotateY(180deg);
+            padding: 32px 32px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid var(--gold);
+            margin: 15px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        /* Dog ear – folded corner in top right, opens RSVP */
+        .dog-ear {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 52px 52px 0;
+            border-color: transparent var(--gold-soft) transparent transparent;
+            cursor: pointer;
+            z-index: 5;
+            box-shadow: -2px 2px 6px rgba(0,0,0,0.08);
+            transition: border-color 0.2s, filter 0.2s;
+        }
+
+        .dog-ear:hover {
+            border-right-color: var(--gold);
+            filter: brightness(1.05);
+        }
+
+        .dog-ear::after {
+            content: 'RSVP';
+            position: absolute;
+            top: 14px;
+            right: -44px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--forest);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        /* Third face: RSVP – same size, position and layout as back (content from top) */
+        .card-rsvp {
+            background: var(--cream);
+            transform: rotateY(360deg);
+            padding: 44px 40px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .card-rsvp .rsvp-back-link,
+        .card-rsvp .rsvp-face-title,
+        .card-rsvp .rsvp-face-invite,
+        .card-rsvp .rsvp-form,
+        .card-rsvp .rsvp-success {
+            flex-shrink: 0;
+        }
+
+        .card-rsvp::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid var(--gold);
+            margin: 15px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .card-rsvp .rsvp-back-link {
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 2;
+            opacity: 0.8;
+        }
+
+        .card-rsvp .rsvp-back-link:hover {
+            color: var(--forest);
+            opacity: 1;
+        }
+
+        .card-rsvp .rsvp-face-title {
+            font-family: 'Italiana', serif;
+            font-size: 22px;
+            color: var(--forest);
+            letter-spacing: 4px;
+            margin: 32px 0 8px;
+        }
+
+        .card-rsvp .rsvp-face-invite {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            margin-bottom: 28px;
+        }
+
+        .card-rsvp .rsvp-form {
+            padding: 0;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 8px;
+        }
+
+        .card-rsvp .rsvp-form label {
+            margin-top: 12px;
+        }
+
+        .card-rsvp .rsvp-form label:first-of-type {
+            margin-top: 0;
+        }
+
+        .card-rsvp .rsvp-success {
+            padding: 32px 0 24px;
+        }
+
+        .ornament {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .ornament svg {
+            fill: var(--gold);
+        }
+
+        .invitation-text {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 200;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            margin-bottom: 14px;
+        }
+
+        .couple-names {
+            font-family: 'Italiana', serif;
+            font-size: 36px;
+            color: var(--forest);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .couple-names .ampersand {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 32px;
+            color: var(--gold);
+            display: block;
+            margin: 8px 0;
+        }
+
+        .event-type {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 11px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--sage);
+            margin: 16px 0 12px;
+        }
+
+        .divider {
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 14px 0;
+        }
+
+        .date-section {
+            margin: 14px 0;
+        }
+
+        .date-day {
+            font-family: 'Italiana', serif;
+            font-size: 56px;
+            color: var(--forest);
+            line-height: 1;
+        }
+
+        .date-month-year {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            margin-top: 4px;
+        }
+
+        .time-section {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            color: var(--forest);
+            margin: 10px 0;
+        }
+
+        .venue-section {
+            margin-top: 16px;
+            margin-bottom: 0;
+        }
+
+        .venue-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: var(--forest);
+            margin-bottom: 8px;
+        }
+
+        .venue-address {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-soft);
+            line-height: 2;
+        }
+
+        .rsvp-section {
+            margin-top: 20px;
+            padding-top: 18px;
+            padding-bottom: 8px;
+            border-top: 1px solid var(--gold-light);
+        }
+
+        .rsvp-text {
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+        }
+
+        .rsvp-btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 12px 28px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 400;
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--cream);
+            background: var(--forest);
+            border: 2px solid var(--gold);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px rgba(74, 107, 90, 0.2);
+        }
+
+        .rsvp-btn:hover {
+            background: var(--forest-soft);
+            border-color: var(--gold-soft);
+            color: var(--white);
+        }
+
+        .rsvp-form {
+            padding: 4px 0 0;
+        }
+
+        .rsvp-form label {
+            display: block;
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-soft);
+            margin-top: 10px;
+            margin-bottom: 3px;
+        }
+
+        .rsvp-form input,
+        .rsvp-form select,
+        .rsvp-form textarea {
+            width: 100%;
+            padding: 8px 10px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            color: var(--forest);
+            background: var(--white);
+            border: 1px solid var(--gold-light);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .rsvp-form textarea {
+            min-height: 64px;
+            resize: vertical;
+        }
+
+        .rsvp-form input:focus,
+        .rsvp-form select:focus,
+        .rsvp-form textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .rsvp-form .submit-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 10px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-weight: 300;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--cream);
+            background: var(--forest);
+            border: 1px solid var(--gold-soft);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .rsvp-form .submit-btn:hover {
+            background: var(--forest-soft);
+        }
+
+        .rsvp-form .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .rsvp-success {
+            padding: 40px 24px 32px;
+            text-align: center;
+            display: none;
+        }
+
+        .rsvp-success.is-visible {
+            display: block;
+        }
+
+        .rsvp-success p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: var(--forest);
+            margin: 0;
+        }
+
+        .rsvp-form.is-hidden {
+            display: none;
+        }
+
+        .corner-ornament {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.6;
+        }
+
+        .corner-ornament.top-left {
+            top: 25px;
+            left: 25px;
+        }
+
+        .corner-ornament.top-right {
+            top: 25px;
+            right: 25px;
+            transform: rotate(90deg);
+        }
+
+        .corner-ornament.bottom-left {
+            bottom: 25px;
+            left: 25px;
+            transform: rotate(-90deg);
+        }
+
+        .corner-ornament.bottom-right {
+            bottom: 25px;
+            right: 25px;
+            transform: rotate(180deg);
+        }
+
+        /* Responsive – card fills viewport, no scrollbar */
+        @media (max-width: 500px) {
+            .card-wrapper {
+                width: 94vw;
+                height: min(90vh, 92dvh);
+            }
+
+            .card-front,
+            .card-back,
+            .card-rsvp {
+                padding: 28px 24px 32px;
+            }
+
+            .photo-frame {
+                width: 72%;
+                max-width: 260px;
+                margin-bottom: 16px;
+            }
+
+            .front-names {
+                font-size: 20px;
+                letter-spacing: 4px;
+            }
+
+            .couple-names {
+                font-size: 26px;
+            }
+
+            .date-day {
+                font-size: 42px;
+            }
+
+            .invitation-text,
+            .event-type,
+            .date-month-year,
+            .time-section,
+            .venue-name,
+            .venue-address {
+                font-size: clamp(0.85rem, 2.5vw, 1rem);
+            }
+
+            .venue-address {
+                line-height: 1.5;
+            }
+
+            .divider {
+                margin: 12px 0;
+            }
+
+            .dog-ear {
+                border-width: 0 42px 42px 0;
+            }
+
+            .dog-ear::after {
+                right: -36px;
+                font-size: 8px;
+            }
+        }
+
+        /* Very small height (e.g. landscape phone) – shrink card so content fits without scroll */
+        @media (max-height: 520px) {
+            .card-wrapper {
+                height: min(96vh, 96dvh);
+            }
+
+            .card-front,
+            .card-back,
+            .card-rsvp {
+                padding: 20px 20px 24px;
+            }
+
+            .photo-frame {
+                margin-bottom: 8px;
+            }
+
+            .flip-hint {
+                bottom: 8px;
+                font-size: 9px;
+            }
+
+            .card-back .couple-names { font-size: 22px; }
+            .card-back .date-day { font-size: 36px; }
+            .card-back .invitation-text,
+            .card-back .event-type,
+            .card-back .date-month-year,
+            .card-back .time-section,
+            .card-back .venue-name,
+            .card-back .venue-address { font-size: 0.9rem; }
+            .card-back .divider { margin: 8px 0; }
+        }
+    </style>
+</head>
+<body>
+    <svg id="background-canvas"></svg>
+    <svg id="particles-canvas"></svg>
+
+    <div class="flowers-3d" id="flowers-3d"></div>
+
+    <div class="invitation-container">
+        <div class="card-wrapper state-front" id="card">
+            <!-- Front of Card -->
+            <div class="card-face card-front">
+                <div class="photo-frame">
+                    <img src="couple.jpg" alt="Thai and Partner" />
+                </div>
+                <div class="front-names">
+                    Thai <span class="front-ampersand">&</span> Partner
+                </div>
+                <div class="flip-hint">Click to reveal details</div>
+            </div>
+
+            <!-- Back of Card (details) -->
+            <div class="card-face card-back">
+                <button type="button" class="dog-ear" id="dog-ear" aria-label="Open RSVP"></button>
+                <svg class="corner-ornament top-left" viewBox="0 0 60 60">
+                    <path d="M0 60 Q0 0 60 0" fill="none" stroke="#B8A574" stroke-width="1"/>
+                    <path d="M10 50 Q10 10 50 10" fill="none" stroke="#D4C9A8" stroke-width="0.5"/>
+                    <circle cx="5" cy="55" r="2" fill="#B8A574"/>
+                </svg>
+                <svg class="corner-ornament top-right" viewBox="0 0 60 60">
+                    <path d="M0 60 Q0 0 60 0" fill="none" stroke="#B8A574" stroke-width="1"/>
+                    <path d="M10 50 Q10 10 50 10" fill="none" stroke="#D4C9A8" stroke-width="0.5"/>
+                    <circle cx="5" cy="55" r="2" fill="#B8A574"/>
+                </svg>
+                <svg class="corner-ornament bottom-left" viewBox="0 0 60 60">
+                    <path d="M0 60 Q0 0 60 0" fill="none" stroke="#B8A574" stroke-width="1"/>
+                    <path d="M10 50 Q10 10 50 10" fill="none" stroke="#D4C9A8" stroke-width="0.5"/>
+                    <circle cx="5" cy="55" r="2" fill="#B8A574"/>
+                </svg>
+                <svg class="corner-ornament bottom-right" viewBox="0 0 60 60">
+                    <path d="M0 60 Q0 0 60 0" fill="none" stroke="#B8A574" stroke-width="1"/>
+                    <path d="M10 50 Q10 10 50 10" fill="none" stroke="#D4C9A8" stroke-width="0.5"/>
+                    <circle cx="5" cy="55" r="2" fill="#B8A574"/>
+                </svg>
+
+                <div class="ornament">
+                    <svg viewBox="0 0 120 40">
+                        <path d="M60 20 Q45 5 30 20 Q15 35 0 20" fill="none" stroke="#B8A574" stroke-width="1"/>
+                        <path d="M60 20 Q75 5 90 20 Q105 35 120 20" fill="none" stroke="#B8A574" stroke-width="1"/>
+                        <circle cx="60" cy="20" r="3" fill="#B8A574"/>
+                        <circle cx="30" cy="20" r="2" fill="#B8A574"/>
+                        <circle cx="90" cy="20" r="2" fill="#B8A574"/>
+                    </svg>
+                </div>
+
+                <div class="invitation-text">Together with their families</div>
+
+                <div class="couple-names">
+                    Thai
+                    <span class="ampersand">&</span>
+                    Partner
+                </div>
+
+                <div class="event-type">Wedding Ceremony</div>
+
+                <div class="divider"></div>
+
+                <div class="date-section">
+                    <div class="date-day">15</div>
+                    <div class="date-month-year">March 2026</div>
+                </div>
+
+                <div class="time-section">
+                    Four o'clock in the afternoon
+                </div>
+
+                <div class="venue-section">
+                    <div class="venue-name">San Francisco City Hall</div>
+                    <div class="venue-address">
+                        1 Dr Carlton B Goodlett Pl<br>
+                        San Francisco, CA 94102
+                    </div>
+                </div>
+
+                <div class="rsvp-section">
+                    <div class="rsvp-text">Kindly respond by February 15, 2026</div>
+                </div>
+            </div>
+
+            <!-- Third face: RSVP (same flip animation as front↔back) -->
+            <div class="card-face card-rsvp">
+                <a href="#" class="rsvp-back-link" id="rsvp-back">← Back to details</a>
+                <h3 class="rsvp-face-title">RSVP</h3>
+                <p class="rsvp-face-invite">We would be delighted to hear from you</p>
+                <div class="rsvp-success" id="rsvp-success">
+                    <p>Thank you! We&rsquo;ve received your response.</p>
+                </div>
+                <form class="rsvp-form" id="rsvp-form" action="https://formspree.io/f/mnjvobjy" method="POST">
+                    <label for="rsvp-names">Name(s)</label>
+                    <input type="text" id="rsvp-names" name="names" required placeholder="Your name or names">
+                    <label for="rsvp-email">Email</label>
+                    <input type="email" id="rsvp-email" name="email" required placeholder="your@email.com">
+                    <label for="rsvp-attending">Attending?</label>
+                    <select id="rsvp-attending" name="attending" required>
+                        <option value="">Please select</option>
+                        <option value="Yes">Yes, joyfully</option>
+                        <option value="No">Regretfully, no</option>
+                    </select>
+                    <label for="rsvp-guests">Number of guests</label>
+                    <input type="number" id="rsvp-guests" name="guests" min="0" value="1" placeholder="Including yourself">
+                    <label for="rsvp-notes">Dietary or notes</label>
+                    <textarea id="rsvp-notes" name="notes" placeholder="Dietary restrictions, song requests, etc."></textarea>
+                    <button type="submit" class="submit-btn">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Click on card: only flips between front and back. Dog ear only: flips to RSVP.
+        const card = document.getElementById('card');
+        const dogEar = document.getElementById('dog-ear');
+        const rsvpBackLink = document.getElementById('rsvp-back');
+        const rsvpForm = document.getElementById('rsvp-form');
+        const rsvpSuccess = document.getElementById('rsvp-success');
+
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.dog-ear') || e.target.closest('.rsvp-back-link') || e.target.closest('form')) return;
+            if (card.classList.contains('state-front')) {
+                card.classList.remove('state-front');
+                card.classList.add('state-back');
+            } else if (card.classList.contains('state-back')) {
+                card.classList.remove('state-back');
+                card.classList.add('state-front');
+            } else if (card.classList.contains('state-rsvp')) {
+                card.classList.remove('state-rsvp');
+                card.classList.add('state-back');
+            }
+        });
+
+        dogEar.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (card.classList.contains('state-back')) {
+                card.classList.remove('state-back');
+                card.classList.add('state-rsvp');
+            }
+        });
+
+        rsvpBackLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            card.classList.remove('state-rsvp');
+            card.classList.add('state-back');
+        });
+
+        rsvpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = rsvpForm.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
+            try {
+                const res = await fetch(rsvpForm.action, {
+                    method: 'POST',
+                    body: new FormData(rsvpForm),
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res.ok) {
+                    rsvpForm.classList.add('is-hidden');
+                    rsvpSuccess.classList.add('is-visible');
+                } else {
+                    throw new Error('Submit failed');
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send';
+                alert('Something went wrong. Please try again or email us directly.');
+            }
+        });
+
+        // Create 3D floating flowers with rotating petals (petals scale with flower size)
+        function createFlower3d(type, x, y, size, bloomClass) {
+            const container = document.getElementById('flowers-3d');
+            const flower = document.createElement('div');
+            flower.className = `flower-3d ${type} ${bloomClass}`;
+            flower.style.left = (x - size / 2) + 'px';
+            flower.style.top = (y - size / 2) + 'px';
+            flower.style.width = size + 'px';
+            flower.style.height = size + 'px';
+
+            const scale = size / (type === 'rose' ? 56 : 44);
+            const petalW = (type === 'rose' ? 28 : 12) * scale;
+            const petalH = (type === 'rose' ? 36 : 24) * scale;
+            const centerSize = (type === 'rose' ? 14 : 10) * scale;
+
+            const petalsEl = document.createElement('div');
+            petalsEl.className = 'petals';
+            const petalCount = type === 'rose' ? 8 : 12;
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                const angle = (360 / petalCount) * i;
+                petal.style.transform = `rotateZ(${angle}deg) rotateX(${type === 'rose' ? 18 : 8}deg)`;
+                petal.style.width = petalW + 'px';
+                petal.style.height = petalH + 'px';
+                petal.style.marginLeft = (-petalW / 2) + 'px';
+                petal.style.marginTop = (-petalH) + 'px';
+                petalsEl.appendChild(petal);
+            }
+            flower.appendChild(petalsEl);
+            const center = document.createElement('div');
+            center.className = 'center';
+            center.style.width = centerSize + 'px';
+            center.style.height = centerSize + 'px';
+            center.style.marginLeft = (-centerSize / 2) + 'px';
+            center.style.marginTop = (-centerSize / 2) + 'px';
+            flower.appendChild(center);
+            container.appendChild(flower);
+        }
+
+        const flowerSpots = [
+            { x: 0.08, y: 0.15, size: 58, type: 'rose', bloom: 'bloom' },
+            { x: 0.92, y: 0.22, size: 52, type: 'daisy', bloom: 'bloom-2' },
+            { x: 0.12, y: 0.78, size: 54, type: 'daisy', bloom: 'bloom-3' },
+            { x: 0.88, y: 0.72, size: 56, type: 'rose', bloom: 'bloom' },
+            { x: 0.92, y: 0.55, size: 48, type: 'daisy', bloom: 'bloom' },
+            { x: 0.06, y: 0.48, size: 50, type: 'rose', bloom: 'bloom-2' },
+            { x: 0.25, y: 0.08, size: 40, type: 'daisy', bloom: 'bloom-2' },
+            { x: 0.75, y: 0.88, size: 42, type: 'rose', bloom: 'bloom-3' },
+            { x: 0.18, y: 0.32, size: 38, type: 'rose', bloom: 'bloom' },
+            { x: 0.82, y: 0.38, size: 44, type: 'daisy', bloom: 'bloom-2' },
+            { x: 0.85, y: 0.08, size: 46, type: 'rose', bloom: 'bloom' },
+            { x: 0.32, y: 0.18, size: 28, type: 'daisy', bloom: 'bloom-3' },
+            { x: 0.68, y: 0.82, size: 30, type: 'rose', bloom: 'bloom' },
+            { x: 0.72, y: 0.58, size: 34, type: 'rose', bloom: 'bloom-2' }
+        ];
+        flowerSpots.forEach(({ x, y, size, type, bloom }) => {
+            createFlower3d(type, window.innerWidth * x, window.innerHeight * y, size, bloom);
+        });
+
+        // D3.js Background Botanical Animation - lighter WRH palette, more prominent
+        const bgSvg = d3.select('#background-canvas')
+            .attr('width', window.innerWidth)
+            .attr('height', window.innerHeight);
+
+        const particlesSvg = d3.select('#particles-canvas')
+            .attr('width', window.innerWidth)
+            .attr('height', window.innerHeight);
+
+        // Lighter White Rabbit Hole–inspired palette
+        const colors = {
+            leaves: ['#7A9B7A', '#9BB89A', '#A8C4A6', '#B5CFB3', '#C5D9C8', '#6B8B7A'],
+            gold: ['#B8A574', '#D4C9A8', '#E5DCC5'],
+            flowers: ['#E5DCC5', '#F5F3ED', '#D4C9A8']
+        };
+
+        // Create gradient definitions
+        const defs = bgSvg.append('defs');
+
+        // Radial gradient for glow effects
+        const glowGradient = defs.append('radialGradient')
+            .attr('id', 'glowGradient')
+            .attr('cx', '50%')
+            .attr('cy', '50%')
+            .attr('r', '50%');
+
+        glowGradient.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#B8A574')
+            .attr('stop-opacity', 0.35);
+
+        glowGradient.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#B8A574')
+            .attr('stop-opacity', 0);
+
+        // Generate botanical leaf paths
+        function generateLeafPath(size) {
+            const leafTypes = [
+                // Eucalyptus-style rounded leaf
+                `M0,0 Q${size*0.3},${-size*0.2} ${size*0.5},${-size*0.8} Q${size*0.55},${-size} ${size*0.5},${-size*1.2} Q${size*0.3},${-size*0.9} 0,${-size*0.5} Q${-size*0.3},${-size*0.9} ${-size*0.5},${-size*1.2} Q${-size*0.55},${-size} ${-size*0.5},${-size*0.8} Q${-size*0.3},${-size*0.2} 0,0`,
+                // Fern frond
+                `M0,0 C${size*0.2},${-size*0.3} ${size*0.1},${-size*0.6} 0,${-size} C${-size*0.1},${-size*0.6} ${-size*0.2},${-size*0.3} 0,0`,
+                // Monstera-inspired
+                `M0,0 Q${size*0.4},${-size*0.1} ${size*0.5},${-size*0.5} Q${size*0.4},${-size*0.8} 0,${-size} Q${-size*0.4},${-size*0.8} ${-size*0.5},${-size*0.5} Q${-size*0.4},${-size*0.1} 0,0`,
+                // Simple oval leaf
+                `M0,0 Q${size*0.3},${-size*0.4} 0,${-size} Q${-size*0.3},${-size*0.4} 0,0`
+            ];
+            return leafTypes[Math.floor(Math.random() * leafTypes.length)];
+        }
+
+        // Generate branch/vine paths
+        function generateVinePath(startX, startY, length, direction) {
+            let path = `M${startX},${startY}`;
+            let x = startX;
+            let y = startY;
+            const segments = Math.floor(length / 50);
+            
+            for (let i = 0; i < segments; i++) {
+                const dx = (Math.random() - 0.5) * 100 + (direction === 'right' ? 30 : -30);
+                const dy = Math.random() * 60 - 30;
+                const cx1 = x + dx * 0.3;
+                const cy1 = y + dy * 0.3;
+                x += dx;
+                y += dy;
+                path += ` Q${cx1},${cy1} ${x},${y}`;
+            }
+            return path;
+        }
+
+        // Create floating leaves - larger and more prominent
+        const numLeaves = 50;
+        const leaves = [];
+
+        for (let i = 0; i < numLeaves; i++) {
+            const isEdge = Math.random() > 0.25;
+            let x, y;
+            
+            if (isEdge) {
+                const edge = Math.floor(Math.random() * 4);
+                switch(edge) {
+                    case 0: x = Math.random() * window.innerWidth * 0.35; y = Math.random() * window.innerHeight; break;
+                    case 1: x = window.innerWidth - Math.random() * window.innerWidth * 0.35; y = Math.random() * window.innerHeight; break;
+                    case 2: x = Math.random() * window.innerWidth; y = Math.random() * window.innerHeight * 0.35; break;
+                    case 3: x = Math.random() * window.innerWidth; y = window.innerHeight - Math.random() * window.innerHeight * 0.35; break;
+                }
+            } else {
+                x = Math.random() * window.innerWidth;
+                y = Math.random() * window.innerHeight;
+            }
+
+            leaves.push({
+                x: x,
+                y: y,
+                size: Math.random() * 42 + 28,
+                rotation: Math.random() * 360,
+                color: colors.leaves[Math.floor(Math.random() * colors.leaves.length)],
+                swayAmplitude: Math.random() * 12 + 6,
+                swaySpeed: Math.random() * 0.006 + 0.004,
+                phase: Math.random() * Math.PI * 2,
+                opacity: Math.random() * 0.5 + 0.4
+            });
+        }
+
+        const leafGroup = bgSvg.append('g').attr('class', 'leaves');
+
+        const leafElements = leafGroup.selectAll('.leaf')
+            .data(leaves)
+            .enter()
+            .append('path')
+            .attr('class', 'leaf')
+            .attr('d', d => generateLeafPath(d.size))
+            .attr('fill', d => d.color)
+            .attr('opacity', d => d.opacity)
+            .attr('transform', d => `translate(${d.x}, ${d.y}) rotate(${d.rotation})`);
+
+        // Create vines/branches from edges
+        const vineGroup = bgSvg.append('g').attr('class', 'vines');
+        const numVines = 8;
+
+        for (let i = 0; i < numVines; i++) {
+            const edge = Math.floor(Math.random() * 4);
+            let startX, startY, direction;
+            
+            switch(edge) {
+                case 0: 
+                    startX = 0; 
+                    startY = Math.random() * window.innerHeight;
+                    direction = 'right';
+                    break;
+                case 1: 
+                    startX = window.innerWidth; 
+                    startY = Math.random() * window.innerHeight;
+                    direction = 'left';
+                    break;
+                case 2: 
+                    startX = Math.random() * window.innerWidth; 
+                    startY = 0;
+                    direction = 'down';
+                    break;
+                case 3: 
+                    startX = Math.random() * window.innerWidth; 
+                    startY = window.innerHeight;
+                    direction = 'up';
+                    break;
+            }
+
+            vineGroup.append('path')
+                .attr('d', generateVinePath(startX, startY, Math.random() * 220 + 180, direction))
+                .attr('fill', 'none')
+                .attr('stroke', colors.leaves[Math.floor(Math.random() * colors.leaves.length)])
+                .attr('stroke-width', Math.random() * 2.5 + 1.5)
+                .attr('opacity', 0.55)
+                .attr('stroke-linecap', 'round');
+        }
+
+        // Create floating golden particles - more visible
+        const numParticles = 70;
+        const particles = [];
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                size: Math.random() * 5 + 2,
+                speed: Math.random() * 0.35 + 0.12,
+                phase: Math.random() * Math.PI * 2,
+                floatSpeed: Math.random() * 0.01 + 0.005
+            });
+        }
+
+        const particleElements = particlesSvg.selectAll('.particle')
+            .data(particles)
+            .enter()
+            .append('circle')
+            .attr('class', 'particle')
+            .attr('r', d => d.size)
+            .attr('fill', 'url(#glowGradient)')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+        const particleDots = particlesSvg.selectAll('.particle-dot')
+            .data(particles)
+            .enter()
+            .append('circle')
+            .attr('class', 'particle-dot')
+            .attr('r', d => d.size * 0.4)
+            .attr('fill', '#B8A574')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y)
+            .attr('opacity', 0.85);
+
+        // Create decorative gold flourishes in corners
+        const flourishGroup = bgSvg.append('g').attr('class', 'flourishes');
+
+        function createCornerFlourish(x, y, scale, rotation) {
+            const g = flourishGroup.append('g')
+                .attr('transform', `translate(${x}, ${y}) rotate(${rotation}) scale(${scale})`);
+            
+            g.append('path')
+                .attr('d', 'M0,0 Q50,-20 80,-60 Q90,-80 70,-90 Q50,-85 40,-60 Q30,-40 50,-20 Q70,0 100,10')
+                .attr('fill', 'none')
+                .attr('stroke', '#B8A574')
+                .attr('stroke-width', 2)
+                .attr('opacity', 0.55);
+
+            g.append('path')
+                .attr('d', 'M20,-10 Q40,-30 35,-50')
+                .attr('fill', 'none')
+                .attr('stroke', '#B8A574')
+                .attr('stroke-width', 1.2)
+                .attr('opacity', 0.4);
+
+            g.append('circle')
+                .attr('cx', 100)
+                .attr('cy', 10)
+                .attr('r', 5)
+                .attr('fill', '#B8A574')
+                .attr('opacity', 0.5);
+
+            g.append('circle')
+                .attr('cx', 70)
+                .attr('cy', -90)
+                .attr('r', 4)
+                .attr('fill', '#B8A574')
+                .attr('opacity', 0.4);
+        }
+
+        createCornerFlourish(50, 50, 1, 0);
+        createCornerFlourish(window.innerWidth - 50, 50, 1, 90);
+        createCornerFlourish(50, window.innerHeight - 50, 1, -90);
+        createCornerFlourish(window.innerWidth - 50, window.innerHeight - 50, 1, 180);
+
+        // Animation loop
+        let time = 0;
+
+        function animate() {
+            time += 1;
+
+            // Gentle breeze: leaves sway slowly with horizontal drift and soft rotation
+            const breezeX = Math.sin(time * 0.003) * 8;
+            const breezeTilt = Math.sin(time * 0.0025 + 0.5) * 2;
+            leafElements
+                .attr('transform', d => {
+                    const sway = Math.sin(time * d.swaySpeed + d.phase) * d.swayAmplitude;
+                    const driftY = Math.sin(time * d.swaySpeed * 0.7 + d.phase) * 3;
+                    const rot = d.rotation + Math.sin(time * d.swaySpeed + d.phase) * 3 + breezeTilt;
+                    return `translate(${d.x + sway + breezeX * 0.3}, ${d.y + driftY}) rotate(${rot})`;
+                });
+
+            // Vines sway gently in the breeze
+            vineGroup.attr('transform', `translate(${Math.sin(time * 0.002) * 4}, ${Math.sin(time * 0.0025 + 1) * 3})`);
+
+            // Particles drift upward slowly with gentle horizontal breeze
+            particles.forEach((p, i) => {
+                p.y -= p.speed * 0.6;
+                p.x += Math.sin(time * p.floatSpeed + p.phase) * 0.8 + Math.sin(time * 0.002 + p.phase * 0.5) * 0.4;
+                
+                if (p.y < -20) {
+                    p.y = window.innerHeight + 20;
+                    p.x = Math.random() * window.innerWidth;
+                }
+            });
+
+            particleElements
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y)
+                .attr('opacity', d => 0.3 + Math.sin(time * 0.05 + d.phase) * 0.2);
+
+            particleDots
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y)
+                .attr('opacity', d => 0.6 + Math.sin(time * 0.05 + d.phase) * 0.3);
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            bgSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+            particlesSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+        });
+    </script>
+</body>
+</html>

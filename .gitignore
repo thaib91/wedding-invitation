@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Optional: uncomment if you add local dev tools
+# node_modules/
+# .env
+# .env.local
