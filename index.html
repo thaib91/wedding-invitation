@@ -968,6 +968,7 @@
                     <p>Thank you! We&rsquo;ve received your response.</p>
                 </div>
                 <form class="rsvp-form" id="rsvp-form" action="https://formspree.io/f/mnjvobjy" method="POST">
+                    <input type="hidden" name="device_type" id="rsvp-device-type" value="">
                     <label for="rsvp-names">Name(s)</label>
                     <input type="text" id="rsvp-names" name="names" required placeholder="Your name or names">
                     <label for="rsvp-email">Email</label>
@@ -998,15 +999,14 @@
 
         card.addEventListener('click', (e) => {
             if (e.target.closest('.dog-ear') || e.target.closest('.rsvp-back-link') || e.target.closest('form')) return;
+            // On RSVP view, only "Back to details" flips; ignore other taps (e.g. outside inputs)
+            if (card.classList.contains('state-rsvp')) return;
             if (card.classList.contains('state-front')) {
                 card.classList.remove('state-front');
                 card.classList.add('state-back');
             } else if (card.classList.contains('state-back')) {
                 card.classList.remove('state-back');
                 card.classList.add('state-front');
-            } else if (card.classList.contains('state-rsvp')) {
-                card.classList.remove('state-rsvp');
-                card.classList.add('state-back');
             }
         });
 
@@ -1025,8 +1025,19 @@
             card.classList.add('state-back');
         });
 
+        // Set device_type for Formspree (mobile vs desktop) – used when submitting
+        function getDeviceType() {
+            const ua = navigator.userAgent || '';
+            const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const smallViewport = typeof window !== 'undefined' && window.innerWidth <= 768;
+            return (mobileUA || smallViewport) ? 'mobile' : 'desktop';
+        }
+        const deviceInput = document.getElementById('rsvp-device-type');
+        if (deviceInput) deviceInput.value = getDeviceType();
+
         rsvpForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (deviceInput) deviceInput.value = getDeviceType();
             const submitBtn = rsvpForm.querySelector('.submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending…';
