@@ -496,6 +496,15 @@
             width: 100%;
             max-width: 320px;
             margin-top: 8px;
+            pointer-events: auto;
+            touch-action: manipulation;
+        }
+
+        .card-rsvp .rsvp-form input,
+        .card-rsvp .rsvp-form select,
+        .card-rsvp .rsvp-form textarea {
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .card-rsvp .rsvp-form label {
@@ -996,6 +1005,10 @@
         const rsvpBackLink = document.getElementById('rsvp-back');
         const rsvpForm = document.getElementById('rsvp-form');
         const rsvpSuccess = document.getElementById('rsvp-success');
+
+        // Stop clicks inside the form from reaching the card (fixes mobile: tap back into inputs)
+        rsvpForm.addEventListener('click', (e) => e.stopPropagation(), true);
+        rsvpForm.addEventListener('touchstart', (e) => e.stopPropagation(), true);
 
         card.addEventListener('click', (e) => {
             if (e.target.closest('.dog-ear') || e.target.closest('.rsvp-back-link') || e.target.closest('form')) return;
