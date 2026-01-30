@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jingwen + Thai | Wedding Invitation</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Italiana&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -186,6 +188,7 @@
             perspective: 1000px;
             perspective-origin: center center;
             overflow: visible;
+            contain: layout style;
         }
 
         .card-wrapper {
@@ -998,6 +1001,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script>
         // Click on card: only flips between front and back. Dog ear only: flips to RSVP.
         const card = document.getElementById('card');
@@ -1245,9 +1249,9 @@
             .attr('opacity', d => d.opacity)
             .attr('transform', d => `translate(${d.x}, ${d.y}) rotate(${d.rotation})`);
 
-        // Create vines/branches from edges
+        // Create vines/branches from edges (reduced for performance)
         const vineGroup = bgSvg.append('g').attr('class', 'vines');
-        const numVines = 8;
+        const numVines = 5;
 
         for (let i = 0; i < numVines; i++) {
             const edge = Math.floor(Math.random() * 4);
@@ -1362,11 +1366,14 @@
         createCornerFlourish(50, window.innerHeight - 50, 1, -90);
         createCornerFlourish(window.innerWidth - 50, window.innerHeight - 50, 1, 180);
 
-        // Animation loop (time-based for consistent motion across frame rates)
+        // Animation loop (time-based; pauses when tab hidden to save CPU/battery)
         let time = 0;
         let lastTick = 0;
+        let rafId = 0;
 
         function animate(now) {
+            rafId = requestAnimationFrame(animate);
+            if (document.hidden) return;
             if (!lastTick) lastTick = now;
             const dt = Math.min((now - lastTick) / 16.67, 4);
             lastTick = now;
@@ -1405,11 +1412,12 @@
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
                 .attr('opacity', d => 0.6 + Math.sin(time * 0.05 + d.phase) * 0.3);
-
-            requestAnimationFrame(animate);
         }
 
-        requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animate);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) lastTick = 0;
+        });
 
         // Debounced resize to avoid layout thrashing
         let resizeTimeout;
