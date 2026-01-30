@@ -54,6 +54,7 @@
             height: 100%;
             z-index: 1;
             pointer-events: none;
+            contain: layout paint;
         }
 
         #particles-canvas {
@@ -64,6 +65,7 @@
             height: 100%;
             z-index: 2;
             pointer-events: none;
+            contain: layout paint;
         }
 
         /* 3D floating flowers layer */
@@ -96,7 +98,8 @@
             left: 50%;
             top: 50%;
             transform-origin: center bottom;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+            /* box-shadow instead of filter for better performance */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
         }
 
         .flower-3d.rose .petal {
@@ -1096,11 +1099,7 @@
             { x: 0.25, y: 0.08, size: 40, type: 'daisy', bloom: 'bloom-2' },
             { x: 0.75, y: 0.88, size: 42, type: 'rose', bloom: 'bloom-3' },
             { x: 0.18, y: 0.32, size: 38, type: 'rose', bloom: 'bloom' },
-            { x: 0.82, y: 0.38, size: 44, type: 'daisy', bloom: 'bloom-2' },
-            { x: 0.85, y: 0.08, size: 46, type: 'rose', bloom: 'bloom' },
-            { x: 0.32, y: 0.18, size: 28, type: 'daisy', bloom: 'bloom-3' },
-            { x: 0.68, y: 0.82, size: 30, type: 'rose', bloom: 'bloom' },
-            { x: 0.72, y: 0.58, size: 34, type: 'rose', bloom: 'bloom-2' }
+            { x: 0.82, y: 0.38, size: 44, type: 'daisy', bloom: 'bloom-2' }
         ];
         flowerSpots.forEach(({ x, y, size, type, bloom }) => {
             createFlower3d(type, window.innerWidth * x, window.innerHeight * y, size, bloom);
@@ -1176,8 +1175,8 @@
             return path;
         }
 
-        // Create floating leaves - larger and more prominent
-        const numLeaves = 50;
+        // Create floating leaves (reduced count for smoother animation)
+        const numLeaves = 28;
         const leaves = [];
 
         for (let i = 0; i < numLeaves; i++) {
@@ -1262,8 +1261,8 @@
                 .attr('stroke-linecap', 'round');
         }
 
-        // Create floating golden particles - more visible
-        const numParticles = 70;
+        // Create floating golden particles (reduced for performance)
+        const numParticles = 40;
         const particles = [];
 
         for (let i = 0; i < numParticles; i++) {
@@ -1339,11 +1338,15 @@
         createCornerFlourish(50, window.innerHeight - 50, 1, -90);
         createCornerFlourish(window.innerWidth - 50, window.innerHeight - 50, 1, 180);
 
-        // Animation loop
+        // Animation loop (time-based for consistent motion across frame rates)
         let time = 0;
+        let lastTick = 0;
 
-        function animate() {
-            time += 1;
+        function animate(now) {
+            if (!lastTick) lastTick = now;
+            const dt = Math.min((now - lastTick) / 16.67, 4);
+            lastTick = now;
+            time += dt;
 
             // Gentle breeze: leaves sway slowly with horizontal drift and soft rotation
             const breezeX = Math.sin(time * 0.003) * 8;
@@ -1360,10 +1363,9 @@
             vineGroup.attr('transform', `translate(${Math.sin(time * 0.002) * 4}, ${Math.sin(time * 0.0025 + 1) * 3})`);
 
             // Particles drift upward slowly with gentle horizontal breeze
-            particles.forEach((p, i) => {
-                p.y -= p.speed * 0.6;
-                p.x += Math.sin(time * p.floatSpeed + p.phase) * 0.8 + Math.sin(time * 0.002 + p.phase * 0.5) * 0.4;
-                
+            particles.forEach((p) => {
+                p.y -= p.speed * 0.6 * dt;
+                p.x += (Math.sin(time * p.floatSpeed + p.phase) * 0.8 + Math.sin(time * 0.002 + p.phase * 0.5) * 0.4) * dt;
                 if (p.y < -20) {
                     p.y = window.innerHeight + 20;
                     p.x = Math.random() * window.innerWidth;
@@ -1383,12 +1385,17 @@
             requestAnimationFrame(animate);
         }
 
-        animate();
+        requestAnimationFrame(animate);
 
-        // Handle window resize
+        // Debounced resize to avoid layout thrashing
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            bgSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
-            particlesSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                resizeTimeout = null;
+                bgSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+                particlesSvg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+            }, 120);
         });
     </script>
 </body>
