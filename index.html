@@ -905,7 +905,7 @@
 
             <!-- Back of Card (details) -->
             <div class="card-face card-back">
-                <button type="button" class="dog-ear" id="dog-ear" aria-label="Open RSVP"></button>
+                <!-- <button type="button" class="dog-ear" id="dog-ear" aria-label="Open RSVP"></button> -->
                 <svg class="corner-ornament top-left" viewBox="0 0 60 60">
                     <path d="M0 60 Q0 0 60 0" fill="none" stroke="#B8A574" stroke-width="1"/>
                     <path d="M10 50 Q10 10 50 10" fill="none" stroke="#D4C9A8" stroke-width="0.5"/>
@@ -945,33 +945,33 @@
                     Thai
                 </div>
 
-                <div class="event-type">Wedding Ceremony</div>
+                <div class="event-type">Solemnization Ceremony</div>
 
                 <div class="divider"></div>
 
                 <div class="date-section">
-                    <div class="date-day">15</div>
+                    <div class="date-day">28</div>
                     <div class="date-month-year">March 2026</div>
                 </div>
 
                 <div class="time-section">
-                    Four o'clock in the afternoon
+                    5:30 PM to 7:30 PM
                 </div>
 
                 <div class="venue-section">
-                    <div class="venue-name">San Francisco City Hall</div>
+                    <div class="venue-name">The Secret Patio @ Duxton</div>
                     <div class="venue-address">
-                        1 Dr Carlton B Goodlett Pl<br>
-                        San Francisco, CA 94102
+                        10A Duxton Hl<br>
+                        Singapore 089594
                     </div>
                 </div>
 
-                <div class="rsvp-section">
-                    <div class="rsvp-text">Kindly respond by February 15, 2026</div>
-                </div>
+                <!-- <div class="rsvp-section">
+                    <div class="rsvp-text">Kindly respond by March 14, 2026</div>
+                </div> -->
             </div>
 
-            <!-- Third face: RSVP (same flip animation as front↔back) -->
+            <!-- Third face: RSVP (commented out)
             <div class="card-face card-rsvp">
                 <a href="#" class="rsvp-back-link" id="rsvp-back">← Back to details</a>
                 <h3 class="rsvp-face-title">RSVP</h3>
@@ -998,25 +998,26 @@
                     <button type="submit" class="submit-btn">Send</button>
                 </form>
             </div>
+            -->
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script>
-        // Click on card: only flips between front and back. Dog ear only: flips to RSVP.
+        // Click on card: flips between front and back. (RSVP / dog-ear commented out.)
         const card = document.getElementById('card');
+
+        /* RSVP functionality commented out
         const dogEar = document.getElementById('dog-ear');
         const rsvpBackLink = document.getElementById('rsvp-back');
         const rsvpForm = document.getElementById('rsvp-form');
         const rsvpSuccess = document.getElementById('rsvp-success');
-
-        // Stop clicks inside the form from reaching the card (fixes mobile: tap back into inputs)
         rsvpForm.addEventListener('click', (e) => e.stopPropagation(), true);
         rsvpForm.addEventListener('touchstart', (e) => e.stopPropagation(), true);
+        */
 
         card.addEventListener('click', (e) => {
             if (e.target.closest('.dog-ear') || e.target.closest('.rsvp-back-link') || e.target.closest('form')) return;
-            // On RSVP view, only "Back to details" flips; ignore other taps (e.g. outside inputs)
             if (card.classList.contains('state-rsvp')) return;
             if (card.classList.contains('state-front')) {
                 card.classList.remove('state-front');
@@ -1027,6 +1028,7 @@
             }
         });
 
+        /* RSVP: dog-ear and back link and form submit commented out
         dogEar.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1035,14 +1037,11 @@
                 card.classList.add('state-rsvp');
             }
         });
-
         rsvpBackLink.addEventListener('click', (e) => {
             e.preventDefault();
             card.classList.remove('state-rsvp');
             card.classList.add('state-back');
         });
-
-        // Set device_type for Formspree (mobile vs desktop) – used when submitting
         function getDeviceType() {
             const ua = navigator.userAgent || '';
             const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
@@ -1051,7 +1050,6 @@
         }
         const deviceInput = document.getElementById('rsvp-device-type');
         if (deviceInput) deviceInput.value = getDeviceType();
-
         rsvpForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (deviceInput) deviceInput.value = getDeviceType();
@@ -1076,6 +1074,7 @@
                 alert('Something went wrong. Please try again or email us directly.');
             }
         });
+        */
 
         // Create 3D floating flowers with rotating petals (petals scale with flower size)
         function createFlower3d(type, x, y, size, bloomClass) {
