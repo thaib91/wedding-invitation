@@ -798,11 +798,11 @@
             transform: rotate(180deg);
         }
 
-        /* Responsive – card fills viewport, no scrollbar; details page compact so notice fits */
+        /* Responsive – card height tuned so content fills it (less white space), notice fits without overlap */
         @media (max-width: 500px) {
             .card-wrapper {
                 width: 94vw;
-                height: min(90vh, 92dvh);
+                height: min(84vh, 86dvh);
             }
 
             .card-front,
@@ -811,7 +811,7 @@
             }
 
             .card-back {
-                padding: 18px 20px 22px;
+                padding: 18px 20px 24px;
             }
 
             .photo-frame {
