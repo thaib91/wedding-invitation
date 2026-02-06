@@ -798,20 +798,20 @@
             transform: rotate(180deg);
         }
 
-        /* Responsive – card height tuned so content fills it (less white space), notice fits without overlap */
+        /* Responsive – card height sized to content on mobile (iPhone 13 Pro etc.) so no large white gap */
         @media (max-width: 500px) {
             .card-wrapper {
                 width: 94vw;
-                height: min(84vh, 86dvh);
+                height: min(70vh, 72dvh);
             }
 
             .card-front,
             .card-rsvp {
-                padding: 28px 24px 32px;
+                padding: 24px 22px 28px;
             }
 
             .card-back {
-                padding: 18px 20px 24px;
+                padding: 16px 18px 20px;
             }
 
             .photo-frame {
