@@ -656,6 +656,14 @@
             opacity: 0.9;
         }
 
+        .solemnization-notice-line {
+            display: block;
+        }
+
+        .solemnization-notice-line + .solemnization-notice-line {
+            margin-top: 6px;
+        }
+
         .rsvp-section {
             margin-top: 20px;
             padding-top: 18px;
@@ -890,14 +898,19 @@
                 line-height: 1.6;
             }
 
-            /* Bottom note: narrower column, left-aligned, matches reference */
+            /* Bottom note: narrower column, left-aligned, two lines; keep spacing tight to avoid overlap */
             .card-back .solemnization-notice {
                 max-width: min(260px, 78%);
                 margin-top: clamp(12px, 3.2vw, 20px);
                 padding-top: clamp(10px, 2.6vw, 14px);
+                padding-bottom: clamp(12px, 3vw, 20px);
                 font-size: clamp(8px, 2.2vw, 10px);
                 line-height: 1.5;
                 text-align: left;
+            }
+
+            .card-back .solemnization-notice-line + .solemnization-notice-line {
+                margin-top: 4px;
             }
 
             .photo-frame {
@@ -1086,7 +1099,8 @@
                 </div>
 
                 <div class="solemnization-notice">
-                    Solemnization will begin promptly at 5:40 PM. We ask that you refrain from using your phone during the solemnization as photographers will be present.
+                    <span class="solemnization-notice-line">Solemnization will begin promptly at 5:40 PM.</span>
+                    <span class="solemnization-notice-line">We ask that you refrain from using your phone during the solemnization as photographers will be present.</span>
                 </div>
 
                 <!-- <div class="rsvp-section">
